@@ -1,5 +1,7 @@
+
 """Problem None."""
 
+import networkx as nx
 from runner import Instance
 
 
@@ -18,4 +20,25 @@ def solve(instance: Instance) -> int:
         instance.directed    True for directed graphs
     You may modify instance.graph: every run gets its own copy.
     """
-    raise NotImplementedError("Write your algorithm for None in src/none/solver.py.")
+
+    # get graph and vertices from the instance
+    graph = instance.graph
+    s = instance.s
+    t = instance.t
+    red = instance.red
+
+    # remove all red vertices (since we dont want them on the path) except start and end
+    red_to_remove = set(red) - {s, t}
+    graph.remove_nodes_from(red_to_remove)
+
+    # shortest path using BFS
+    try:
+        return nx.shortest_path_length(
+            graph,
+            source=s,
+            target=t
+        )
+
+    # Return -1 if no valid path exists
+    except nx.NetworkXNoPath:
+        return -1
