@@ -3,6 +3,7 @@
 
 ```
 Red-Scare/
+├── notebooks         # folder for graph exploration, algorithm experiments, and testing
 ├── red-scare/        # the assignment files (don't edit)
 │   ├── data/         #   the 154 graphs
 │   └── doc/          #   assignment text and report template
