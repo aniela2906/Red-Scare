@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Figures written by runner.draw(save=...) fall back here
+figures/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+.ipynb_checkpoints/
