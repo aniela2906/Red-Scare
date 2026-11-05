@@ -14,6 +14,7 @@ Red-Scare/
 │   ├── many/
 │   ├── few/
 │   └── alternate/
+├── report.docx       (PDF when we are done)
 ├── tests/
 ├── results/          # saved answers, one file per problem
 └── results.txt       # the final table we hand in
