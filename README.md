@@ -8,7 +8,7 @@ red-scare/
 ├── instance-generators/     # Original generators  
 │  
 ├── src/  
-│   ├── graph_parser.py  
+│   ├── runner.py  
 │   ├── none.py  
 │   ├── some.py  
 │   ├── many.py  
