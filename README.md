@@ -19,5 +19,11 @@ red-scare/
 ├── report/  
 │  
 ├── results.txt  
-└── README.md  
+└── README.md 
   
+### TO DO
+- Aniela: ex none; report structure overall 
+- Cristina and Javi: ex alternate
+- Maja and Zosia: ex few
+- João: Build the runner; ex some  
+- Kuba: ex many
