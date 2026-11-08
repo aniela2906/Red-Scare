@@ -1,20 +1,35 @@
 """Problem Few."""
 
-from runner import Instance
+import heapq
 
 
-def solve(instance: Instance) -> int:
-    """The minimum number of red vertices on any s,t-path.
+def solve(instance):
+    """Few: min number of red vertices on any s,t-path, or -1 if none.
+    Dijkstra with vertex costs (1 if red, else 0). Walks are fine because
+    removing a cycle from a walk never adds red vertices.
+    Works on directed and undirected networkx graphs
+    (G.neighbors gives successors for a DiGraph)."""
+    G = instance.graph
+    s, t = instance.s, instance.t
+    red = set(instance.red)
 
-    Return -1 if there is no s,t-path. Example: G-ex -> 0 (path 0, 1, 2, 3).
+    INF = float("inf")
+    dist = {v: INF for v in G.nodes}
+    dist[s] = 1 if s in red else 0
+    pq = [(dist[s], 0, s)]
+    counter = 0  # tie-breaker so heapq never compares vertex names
 
-    Return "?" if you cannot solve this instance, or "?!" if the problem is hard for it.
+    while pq:
+        d, _, u = heapq.heappop(pq)
+        if d > dist[u]:
+            continue
+        if u == t:
+            break
+        for v in G.neighbors(u):
+            nd = d + (1 if v in red else 0)
+            if nd < dist[v]:
+                dist[v] = nd
+                counter += 1
+                heapq.heappush(pq, (nd, counter, v))
 
-    Useful things on ``instance``:
-        instance.graph       the networkx Graph (undirected) or DiGraph (directed)
-        instance.s, .t       start and end vertex (vertex names are strings)
-        instance.red         set of red vertices; instance.is_red(v) also works
-        instance.directed    True for directed graphs
-    You may modify instance.graph: every run gets its own copy.
-    """
-    raise NotImplementedError("Write your algorithm for Few in src/few/solver.py.")
+    return -1 if dist[t] == INF else dist[t]
