@@ -1,5 +1,6 @@
 // Red Scare report: the Some problem.
-// Build:   typst compile report/some.typ
+// Build:   typst compile --root . report/some.typ     (from the repo root)
+//          --root . lets the report read results/some.tsv for the results tables.
 // Figures: uv run python report/figures/make_some_figures.py
 
 #set document(title: "Red Scare: the Some problem", author: "João Maia")
@@ -241,10 +242,68 @@ If it does, we answer `?!`.
   caption: [Which method we use for which kind of graph.],
 )
 
+// ---- results, read from results/some.tsv (written by src/some/run.py) ----
+#let rows = csv("../results/some.tsv", delimiter: "\t").slice(1).map(r => (
+  name: r.at(0), n: int(r.at(1)), m: int(r.at(2)), status: r.at(3),
+  answer: r.at(4), seconds: float(r.at(5)),
+))
+#let family(name) = {
+  let parts = name.split("-")
+  while parts.len() > 1 and parts.last().contains(regex("[0-9]")) { parts = parts.slice(0, -1) }
+  parts.join("-")
+}
+#let thousands(x) = {
+  let digits = str(x).clusters().rev()
+  let out = ()
+  for (i, d) in digits.enumerate() {
+    if i > 0 and calc.rem(i, 3) == 0 { out.push(sym.space.thin) }
+    out.push(d)
+  }
+  out.rev().join()
+}
+#let secs(x) = {
+  if x < 0.001 { return "<0.001" }
+  let ms = str(int(calc.round(x * 1000)))
+  while ms.len() < 4 { ms = "0" + ms }
+  ms.slice(0, -3) + "." + ms.slice(-3)
+}
+#let n-true = rows.filter(r => r.answer == "true").len()
+#let n-false = rows.filter(r => r.answer == "false").len()
+#let total = rows.map(r => r.seconds).sum()
+#let slowest = rows.sorted(key: r => r.seconds).last()
+
 All 31 directed graphs in the data set turned out to have no cycles, so we never needed `?!`.
-We solved all 154 instances: 115 are true and 39 are false.
-Together they took 19.9 seconds of solver time.
-The slowest instance was `wall-n-10000` ($n = 80 thin 000$), at 2.9 seconds.
+We solved all #rows.len() instances: #n-true are true and #n-false are false.
+Together they took #calc.round(total, digits: 1) seconds of solver time.
+The slowest instance was #raw(slowest.name) ($n = #thousands(slowest.n)$), at #calc.round(slowest.seconds, digits: 1) seconds.
+@tab-families sums up the results per family of graphs, and the appendix lists every instance.
+
+#let families = rows.map(r => family(r.name)).dedup()
+#figure(
+  table(
+    columns: 6,
+    align: (left, right, right, right, right, right),
+    stroke: none,
+    table.hline(),
+    table.header([*Family*], [*Instances*], [*true*], [*false*], [*Largest $n$*], [*Time (s)*]),
+    table.hline(stroke: 0.5pt),
+    ..families.map(f => {
+      let rs = rows.filter(r => family(r.name) == f)
+      (
+        raw(f),
+        str(rs.len()),
+        str(rs.filter(r => r.answer == "true").len()),
+        str(rs.filter(r => r.answer == "false").len()),
+        thousands(calc.max(..rs.map(r => r.n))),
+        secs(rs.map(r => r.seconds).sum()),
+      )
+    }).flatten(),
+    table.hline(stroke: 0.5pt),
+    [*Total*], [*#rows.len()*], [*#n-true*], [*#n-false*], [], [*#secs(total)*],
+    table.hline(),
+  ),
+  caption: [Results per family of graphs. Time is the total solver time for the family.],
+) <tab-families>
 
 We tested the solver against brute force (trying every simple path) on 6000 small random graphs, both undirected and directed without cycles.
 It always gave the same answer, and every path it returned was checked to be a real path through a red vertex.
@@ -252,3 +311,29 @@ It always gave the same answer, and every path it returned was checked to be a r
 = References
 
 [1] S. Fortune, J. Hopcroft, J. Wyllie. The directed subgraph homeomorphism problem. _Theoretical Computer Science_ 10(2):111–121, 1980.
+
+#pagebreak()
+#set heading(numbering: none)
+= Appendix: results for every instance <appendix>
+
+All #rows.len() instances, in the same order as `results/some.tsv`.
+Time is the solver time in seconds.
+
+#{
+  set text(size: 8pt)
+  columns(2, gutter: 1.2em, table(
+    columns: (1fr, auto, auto, auto, auto),
+    align: (left, right, right, left, right),
+    stroke: none,
+    inset: (x: 4pt, y: 2.2pt),
+    table.hline(),
+    table.header([*Instance*], [*$n$*], [*$m$*], [*Answer*], [*Time*]),
+    table.hline(stroke: 0.5pt),
+    ..rows.map(r => (
+      raw(r.name), thousands(r.n), thousands(r.m),
+      if r.status == "ok" { r.answer } else { "?" },
+      secs(r.seconds),
+    )).flatten(),
+    table.hline(),
+  ))
+}
