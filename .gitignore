@@ -9,7 +9,7 @@ build/
 dist/
 
 # Figures written by runner.draw(save=...) fall back here
-figures/
+/figures/
 
 # Editors / OS
 .vscode/
