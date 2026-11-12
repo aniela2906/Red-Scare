@@ -1,6 +1,7 @@
 """Problem Alternate."""
 
 from runner import Instance
+from collections import deque
 
 
 def solve(instance: Instance) -> bool:
@@ -18,4 +19,28 @@ def solve(instance: Instance) -> bool:
         instance.directed    True for directed graphs
     You may modify instance.graph: every run gets its own copy.
     """
-    raise NotImplementedError("Write your algorithm for Alternate in src/alternate/solver.py.")
+
+    graph = instance.graph
+    s = instance.s
+    t = instance.t
+    red = instance.red
+
+    if s == t:
+        return True
+
+    seen = {s}              # vertices already discovered (prevents loops)
+    queue = deque([s])      # BFS queue: first discovered, first processed
+
+    while queue:
+        u = queue.popleft()                 # take the next vertex to explore
+        for v in graph.get(u, []):            # look at every neighbour of u
+            # Only cross the edge u -> v if exactly one endpoint is red.
+            if (u in red) != (v in red):
+                if v == t:                  # reached the target: success
+                    return True
+                if v not in seen:           # first time we see v
+                    seen.add(v)
+                    queue.append(v)
+
+    # The queue is empty and t was never reached: no alternating path exists.
+    return False
