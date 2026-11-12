@@ -33,7 +33,6 @@ def solve(instance: Instance) -> bool:
 
     while queue:
         u = queue.popleft()                 # take the next vertex to explore
-        for v in graph.get(u, []):            # look at every neighbour of u
             # Only cross the edge u -> v if exactly one endpoint is red.
             if (u in red) != (v in red):
                 if v == t:                  # reached the target: success
