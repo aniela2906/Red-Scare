@@ -317,26 +317,28 @@ The limit of 16 is a practical choice with no theoretical significance: a table 
 
 === Many is NP-hard
 
-We reduce from _Hamiltonian Path_, which is known to be NP-hard \[7\]\[8\].
+Many is an optimisation problem, so we show that its decision version is NP-hard: _given (G, R, s, t, k), is there a simple s,t-path containing at least k red vertices?_ A polynomial-time algorithm for Many would answer this question by comparing the optimum with k, so Many is at least as hard. We reduce from _Hamiltonian Path_, which is known to be NP-complete \[7, Sec. 8.5\].
 
-Let $G = (V, E)$ be an instance of _Hamiltonian Path_, with $n = |V|$.
+Let $G = (V, E)$ be an instance of _Hamiltonian Path_, with $n = |V|$ and $m = |E|$.
 
-Construct an instance of Many as follows. Add two new vertices s and t, each connected to every vertex in _V_. Keep all original edges and color every vertex red.
+Construct an instance of Many as follows. Add two new vertices s and t, each connected to every vertex in _V_; s and t are not connected to each other. Keep all original edges and colour every vertex red, so $R = V union {s, t}$. Set $k = n + 2$. The resulting graph $G'$ has $n + 2$ vertices and $m + 2n$ edges, and can be constructed in $O(n + m)$ time.
 
-The resulting graph $G'$ contains $n + 2$ vertices and can be constructed in $O(n + m)$ time, where $m = |E|$.
-
-Suppose the _Many_ instance has a simple _s → t_ path, containing $n + 2$ red vertices. Since all vertices are red this path must visit every vertex in $G'$ exactly once. Removing the endpoints _s_ and _t_ leaves a simple path visiting all _n_ original vertices. Therefore, _G_ has a _Hamiltonian Path_.
+Suppose the _Many_ instance has a simple _s,t_-path containing $n + 2$ red vertices. Since $G'$ has only $n + 2$ vertices and all of them are red, this path visits every vertex of $G'$ exactly once. The vertices _s_ and _t_ appear only as its endpoints, so removing them leaves a path $v_1, v_2, ..., v_n$ that visits each of the _n_ original vertices exactly once. Every edge between two consecutive vertices $v_i, v_(i+1)$ joins two original vertices. The only new edges are those at _s_ and _t_, so all of these edges belong to _E_. Therefore, $v_1, ..., v_n$ is a _Hamiltonian Path_ in _G_.
 
 Conversely, suppose _G_ has a _Hamiltonian Path_ $v_1, v_2, ..., v_n$. Since s and t are connected to every original vertex, we can construct the path
 
 $ s -> v_1 -> v_2 -> dots.h.c -> v_n -> t. $
 
-This is a simple path connecting all $n + 2$ red vertices. Hence, the optimal _Many_ value is $n + 2$.
+This is a simple path through all $n + 2$ vertices, and all of them are red. No path in $G'$ can contain more than $n + 2$ vertices, so the optimal _Many_ value is exactly $n + 2$.
 
 Therefore,
 $ G "has a Hamiltonian Path" <==> "Many"(G', R, s, t) = n + 2. $
 
-Since _Hamiltonian Path_ is _NP-hard_ and the reduction takes polynomial time, _Many_ is _NP-hard_.
+Since _Hamiltonian Path_ is NP-complete and the reduction takes polynomial time, _Many_ is _NP-hard_.
+
+_Directed graphs._ The same reduction works for directed graphs. Replace every undirected edge ${u, v}$ of $G'$ by the two arcs $u -> v$ and $v -> u$. A simple path in the resulting directed graph uses each vertex at most once, so it corresponds to a simple path in $G'$ and the other way round. The argument above therefore goes through unchanged. Alternatively, one can reduce directly from _Directed Hamiltonian Path_, which is also NP-complete \[7, Sec. 8.5\]: add arcs $s -> v$ and $v -> t$ for every $v in V$.
+
+_Relation to the ?! answers._ The graphs this reduction produces are exactly the cases where our solver answers ?!. $G'$ is undirected and forms a single block: it stays connected when any one vertex is removed, because s and t are joined to every other vertex. Whenever _G_ is not a path or a cycle and $n >= 15$, this block has more than 16 vertices and is not a cycle. The directed version contains cycles ($u -> v -> u$), and on a cyclic graph the topological-order DP cannot be used. So the hardness result covers precisely the graph classes for which we return ?!.
 
 === Results
 
@@ -426,5 +428,4 @@ We solved problem Alternate for all graphs, directed and undirected, using this 
   [\[5\]], [M. Held and R. M. Karp. A dynamic programming approach to sequencing problems. Journal of the Society for Industrial and Applied Mathematics, 1962.],
   [\[6\]], [S. Fortune, J. Hopcroft and J. Wyllie. The directed subgraph homeomorphism problem. Theoretical Computer Science 10(2):111–121, 1980.],
   [\[7\]], [Kleinberg, J., & Tardos, É. (2006). _Algorithm Design_. Pearson/Addison-Wesley. #link("https://www.cs.princeton.edu/~wayne/kleinberg-tardos/")],
-  [\[8\]], [Wikipedia contributors. _Hamiltonian path problem_. Wikipedia #link("https://en.wikipedia.org/wiki/Hamiltonian_path_problem")],
 )
