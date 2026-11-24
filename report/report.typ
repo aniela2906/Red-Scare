@@ -9,7 +9,7 @@
 #import "@preview/charged-ieee:0.1.4": ieee
 
 #show: ieee.with(
-  title: [Red Scare! Report],
+  title: [Red Scare! Report #v(4pt) #text(size: 11pt)[By:]],
   authors: (
     (name: "Aniela Marta Ciecierska", email: "anci@itu.dk"),
     (name: "Cristina Tuá Silvestre", email: "s25444@itu.dk"),
@@ -43,7 +43,7 @@
 #place(top + center, float: true, scope: "parent", clearance: 18pt,
   text(size: 9pt, link("https://github.com/aniela2906/Red-Scare.git")))
 
-= Results
+= Results:
 
 We evaluated five problems - Alternate, Few, Many, None, and Some - on 154 graph instances. _Table 1_ summarizes the number of instances solved, total execution time, and theoretical running time of our algorithms.
 
