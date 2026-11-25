@@ -14,7 +14,7 @@ Red-Scare/
 │   ├── few/
 │   └── alternate/
 ├── report/           # report folder
-│   ├── report.pdf    
+│   └── report.pdf    
 ├── tests/
 ├── results/          # saved answers, one file per problem
 └── results.txt       # final table 
