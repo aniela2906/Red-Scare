@@ -100,10 +100,3 @@ Any answer that is missing shows up as `?`.
 **Can I change the graph inside `solve`?** Yes. Each run gets its own copy.
 
 **Some graphs have edges from a vertex to itself.** A few `smallworld` files do. These edges can never be part of a path, so they are removed when the graph is loaded.
-
-### TO DO
-- Aniela: ex none; report structure overall
-- Cristina and Javi: ex alternate
-- Maja and Zosia: ex few
-- João: Build the runner; ex some
-- Kuba: ex many
