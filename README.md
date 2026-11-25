@@ -13,7 +13,7 @@ Red-Scare/
 │   ├── many/
 │   ├── few/
 │   └── alternate/
-├── report            # report folder
+├── report/           # report folder
 │   ├── report.pdf    
 ├── tests/
 ├── results/          # saved answers, one file per problem
