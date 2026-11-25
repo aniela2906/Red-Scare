@@ -39,6 +39,10 @@
   inset: (x: 4pt, y: 2.2pt),
   ..args,
 )))
+#let pseudocode(code) = block(
+  width: 100%, inset: (x: 14pt, y: 8pt), stroke: (y: 0.6pt),
+  text(size: 8pt, code),
+)
 
 #place(top + center, float: true, scope: "parent", clearance: 18pt,
   text(size: 9pt, link("https://github.com/aniela2906/Red-Scare.git")))
@@ -169,6 +173,15 @@ The _None_ problem asks whether there is a path from _s_ to _t_ that does not go
 
 To solve this problem, we remove all red vertices (_R_) from the graph ($G = (V, E)$), except the source (_s_) and target (_t_), since these may be red. We then apply _Breadth-First Search (BFS)_ using _NetworkX_'s _shortest\_path\_length()_ \[1\] to find the shortest valid (_s_)-(_t_) path. Removing the forbidden vertices preserves exactly the valid paths, and _BFS_ guarantees the shortest path in an unweighted graph. If no path exists, we return (_-1_).
 
+=== Pseudocode
+
+#pseudocode(```
+NONE(G, s, t, R):
+  remove from G every v in R except s and t
+  d = BFS distance from s to t
+  return d if t is reachable, else -1
+```)
+
 === Correctness and running time
 
 Removing the forbidden internal vertices preserved exactly the admissible s-t paths. BFS finds the shortest path in an unweighted graph. Both vertex filtering and BFS take $O(n + m)$ (where $n = |V|$ and $m = |E|$), for both directed and undirected graphs.
@@ -207,11 +220,11 @@ We run Ford–Fulkerson with BFS \[2, Ch. 7\]. Each round finds one route from _
   fcaption[*Figure 2.* The two rounds of Ford–Fulkerson. In round 2 the backward arc undoes s → a.]
 })
 
-We stop after at most two rounds. If the flow is 2, we read the path from the arcs that carry flow: the route from _s_ to _r_, then the route from _t_ reversed. If the flow stays at 1, there is a single bottleneck vertex that both routes need (max-flow min-cut), so no path goes through this _r_ and we try the next red vertex in the component of _s_. Two shortcuts come first: if _s_ and _t_ are not connected the answer is false, and if _s_ or _t_ is red, any _s,t_-path works. The pseudocode below shows the whole algorithm.
+We stop after at most two rounds. If the flow is 2, we read the path from the arcs that carry flow: the route from _s_ to _r_, then the route from _t_ reversed. If the flow stays at 1, there is a single bottleneck vertex that both routes need (max-flow min-cut), so no path goes through this _r_ and we try the next red vertex in the component of _s_. Two shortcuts come first: if _s_ and _t_ are not connected the answer is false, and if _s_ or _t_ is red, any _s,t_-path works.
 
-#place(bottom, float: true, scope: "parent", clearance: 14pt, block(
-  width: 100%, inset: (x: 14pt, y: 8pt), stroke: (y: 0.6pt),
-  text(size: 8pt, ```
+=== Pseudocode
+
+#pseudocode(```
 SOME(G, s, t, R):
   if G is directed then
     if G has a cycle then return ?!        # NP-hard in general
@@ -234,8 +247,7 @@ SOME(G, s, t, R):
     if flow = 2 then return true   # path = s-route + reversed t-route
     reset N
   return false
-```),
-))
+```)
 
 === Directed graphs
 
@@ -307,6 +319,41 @@ Step 5: the path enters each block at the cut vertex towards the previous block 
 
 Step 6: we add up the block values. Since a red cut vertex between two consecutive blocks is counted in both, we subtract 1 for each such vertex. If s or t is itself a cut vertex, it is an endpoint of the route and nothing is subtracted for it. The sum is the answer.
 
+=== Pseudocode
+
+#pseudocode(```
+MANY(G, s, t, R):
+  if s = t then return 1 if s in R else 0
+  if G is directed then return MANY-DIRECTED(G, s, t, R)
+  return MANY-UNDIRECTED(G, s, t, R)
+
+MANY-DIRECTED(G, s, t, R):
+  keep only vertices reachable from s that can reach t
+  if t is not kept then return -1
+  if the kept subgraph has a cycle then return ?!
+  best[s] = 1 if s in R else 0;  best[v] = -infinity otherwise
+  for v in topological order:
+    for each out-neighbour w of v:
+      best[w] = max(best[w], best[v] + (1 if w in R else 0))
+  return best[t]
+
+MANY-UNDIRECTED(G, s, t, R):
+  if t is not in the component of s then return -1
+  H = component of s
+  (blocks, cut vertices) = Tarjan(H)
+  T = block-cut tree;  P = path in T from s to t
+  total = 0
+  for each block B on P:
+    a = entry vertex, b = exit vertex        # fixed by P
+    if B is a single edge then val = red(a) + red(b)
+    else if B is a cycle then val = larger red count of the two a-b arcs
+    else if |B| <= 16 then val = best simple a-b path by subset DP
+    else return ?!
+    total = total + val
+  for each red cut vertex strictly inside P: total = total - 1
+  return total
+```)
+
 === Correctness and running time
 
 *Directed graphs*: reachability, the acyclicity test with the topological order, and the dynamic program (which looks at each edge once) each take $O(n + m)$ time, so the total is $O(n + m)$.
@@ -371,6 +418,25 @@ In each step we take the cheapest entry _u_ from the queue. If its cost is large
 
 The same code works for directed and undirected graphs, because _neighbors()_ returns the out-neighbours of a vertex in a directed graph and all its neighbours in an undirected graph.
 
+=== Pseudocode
+
+#pseudocode(```
+FEW(G, s, t, R):
+  dist[s] = 1 if s in R else 0
+  dist[v] = infinity for every other v
+  pq = priority queue containing (dist[s], s)
+  while pq is not empty:
+    (d, u) = extract-min(pq)
+    if d > dist[u] then continue          # outdated entry
+    if u = t then break
+    for each neighbour v of u:
+      nd = d + (1 if v in R else 0)
+      if nd < dist[v]:
+        dist[v] = nd
+        push (nd, v) into pq
+  return -1 if dist[t] = infinity else dist[t]
+```)
+
 === Correctness and running time
 
 Every vertex is taken out of the queue and processed at most once, and every edge is looked at a constant number of times, so there are at most $O(m)$ pushes. Each queue operation takes $O(log n)$, which gives a total of $O((n + m) log n)$. This is polynomial for all graphs, so _Few_ never needs the answer _?!_.
@@ -404,6 +470,22 @@ In 24 instances no _s,t_-path exists, and in 69 instances there is a path that a
 === Algorithm
 
 For problem Alternate, we solved each instance $G$ by a breadth-first search from _s_ restricted to the _bichromatic_ edges of $G$, that is, the edges _uv_ for which exactly one of _u_ and _v_ is red. An $s,t$-path is alternating if and only if all of its edges are bichromatic, so an alternating path exists if and only if _t_ is reachable from _s_ in the subgraph _G′_ formed by these edges; a shortest $s,t$-walk in $G'$ visits no vertex twice and is therefore a simple path. We never construct $G'$ explicitly: the search runs on the adjacency lists of $G$ and skips every edge whose endpoints have the same colour, using a hash set of red vertices for constant-time colour tests, a hash set of discovered vertices, and a FIFO queue. The search stops as soon as _t_ is discovered, and the answer is trivially _true_ when $s = t$. The running time of this algorithm is $O(n + m)$, and our implementation spends 0.023 seconds on the instance common-2-5757 with _n_ = 5757 and _m_ = 163,671, which is the slowest of all instances. On the largest instance, wall-n-10000 with _n_ = 80,000, it spends less than 10⁻⁴ seconds, because no bichromatic edge leaves _s_ and the search ends immediately.
+
+=== Pseudocode
+
+#pseudocode(```
+ALTERNATE(G, s, t, R):
+  if s = t then return true
+  seen = {s};  queue = [s]
+  while queue is not empty:
+    u = pop-front(queue)
+    for each neighbour v of u:
+      if (u in R) != (v in R):            # bichromatic edge
+        if v = t then return true
+        if v not in seen:
+          seen.add(v);  push-back(queue, v)
+  return false
+```)
 
 === Correctness and running time
 
